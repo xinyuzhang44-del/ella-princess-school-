@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Trace the Word ✍️👑</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#fdf6ee;--blush:#f7e7ef;--gold:#e6ab46;--gold-soft:#f6d488;
+    --lav:#a87fce;--lav-deep:#7d57a6;--rose:#e892ab;--plum:#4f3d5c;
+    --green:#5fb878;--font:"Fredoka","Trebuchet MS",-apple-system,system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;height:100%;}
+  body{
+    font-family:var(--font);color:var(--plum);
+    background:
+      radial-gradient(1200px 600px at 50% -10%,#fff7e9 0%,transparent 60%),
+      radial-gradient(900px 500px at 90% 110%,#f3e2f3 0%,transparent 55%),
+      linear-gradient(160deg,var(--cream),var(--blush));
+    min-height:100%;display:flex;flex-direction:column;overflow-x:hidden;
+    -webkit-user-select:none;user-select:none;
+  }
+  header{padding:14px 18px 4px;text-align:center;}
+  .title{font-size:clamp(23px,5vw,36px);font-weight:700;letter-spacing:.5px;color:var(--lav-deep);text-shadow:0 2px 0 #fff,0 4px 14px rgba(125,87,166,.18);margin:0;}
+  .title .c{color:var(--gold);}
+  .crowns{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;margin:9px auto 2px;max-width:600px;}
+  .crowns .cr{font-size:15px;line-height:1;filter:grayscale(1) opacity(.3);transition:transform .35s,filter .35s;}
+  .crowns .cr.on{filter:none;transform:scale(1.2);}
+  .bar{display:flex;align-items:center;justify-content:center;gap:7px;flex-wrap:wrap;margin-top:8px;}
+  .btn{font-family:var(--font);font-weight:600;font-size:14px;color:var(--plum);background:#fff;border:2px solid #ecdcc4;border-radius:999px;padding:7px 13px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;box-shadow:0 3px 0 rgba(0,0,0,.05);transition:transform .12s;}
+  .btn:active{transform:translateY(2px);box-shadow:none;}
+  .btn.toggle.off{background:#f0e7e7;color:#b4a6a6;border-color:#e2d6d6;}
+  .counter{font-weight:600;font-size:14px;color:var(--lav-deep);background:#fff;border-radius:999px;padding:7px 13px;border:2px solid #e7d8ef;}
+  .nav{background:#fff;border:2px solid #e7d8ef;border-radius:50%;width:38px;height:38px;font-size:18px;color:var(--lav-deep);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;}
+  .nav:active{transform:scale(.92);}
+  main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:8px 14px 24px;}
+  .stage{background:rgba(255,255,255,.66);border:3px solid #fff;border-radius:30px;padding:clamp(14px,3vw,26px);box-shadow:0 20px 50px rgba(125,87,166,.16),inset 0 0 0 2px rgba(230,171,70,.18);display:flex;flex-direction:column;align-items:center;gap:14px;backdrop-filter:blur(2px);}
+  .pic{font-size:clamp(40px,9vw,66px);line-height:1;}
+  .canvasWrap{position:relative;width:min(88vw,600px);height:clamp(170px,36vh,300px);border-radius:22px;background:#fffdf8;box-shadow:inset 0 0 0 3px rgba(168,127,206,.16);overflow:hidden;touch-action:none;}
+  .canvasWrap canvas{position:absolute;inset:0;width:100%;height:100%;}
+  .meterTrack{width:min(88vw,600px);height:12px;background:#efe2f0;border-radius:999px;overflow:hidden;}
+  .meterFill{height:100%;width:0;background:linear-gradient(90deg,var(--gold-soft),var(--rose));border-radius:999px;transition:width .15s;}
+  .swatches{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;}
+  .sw{width:34px;height:34px;border-radius:50%;cursor:pointer;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.18);transition:transform .12s;}
+  .sw.active{transform:scale(1.25);box-shadow:0 0 0 3px var(--plum);}
+  .spark{position:fixed;pointer-events:none;font-size:26px;animation:rise 1.3s ease-out forwards;z-index:40;}
+  @keyframes rise{0%{opacity:0;transform:translateY(0) scale(.4);}15%{opacity:1;}100%{opacity:0;transform:translateY(-130px) scale(1.3) rotate(40deg);}}
+  .overlay{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:22px;background:rgba(79,61,92,.32);backdrop-filter:blur(4px);z-index:50;animation:fade .3s;}
+  .overlay.show{display:flex;}
+  @keyframes fade{from{opacity:0;}to{opacity:1;}}
+  .burst{font-size:clamp(60px,18vw,130px);animation:pop .5s cubic-bezier(.2,1.4,.4,1);}
+  @keyframes pop{0%{transform:scale(.5);}60%{transform:scale(1.18);}100%{transform:scale(1);}}
+  .ov-word{font-size:clamp(30px,8vw,56px);font-weight:700;color:#fff;letter-spacing:.16em;text-shadow:0 4px 16px rgba(0,0,0,.3);}
+  .ov-sub{color:#fff;font-size:20px;font-weight:500;opacity:.95;text-shadow:0 2px 8px rgba(0,0,0,.3);}
+  .ov-btn{font-family:var(--font);font-weight:700;font-size:22px;color:#fff;background:linear-gradient(180deg,var(--rose),#d4748f);border:none;border-radius:999px;padding:16px 40px;cursor:pointer;box-shadow:0 8px 0 #b85f78,0 14px 30px rgba(0,0,0,.25);display:inline-flex;align-items:center;gap:10px;}
+  .ov-btn:active{transform:translateY(4px);box-shadow:0 4px 0 #b85f78;}
+</style>
+</head>
+<body>
+  <header>
+    <h1 class="title">✍️ Trace the <span class="c">Word</span> 👑</h1>
+    <div class="crowns" id="crowns"></div>
+    <div class="bar">
+      <button class="nav" id="prev">◀</button>
+      <span class="counter" id="counter">1 / 30</span>
+      <button class="nav" id="next">▶</button>
+      <button class="btn" id="mode">½ Half</button>
+      <button class="btn" id="guide">✏️ Solid</button>
+      <button class="btn" id="clear">🧽 Clear</button>
+      <button class="btn toggle" id="sound">🔊 Sound</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="stage">
+      <div class="pic" id="pic">🐱</div>
+      <div class="canvasWrap" id="wrap">
+        <canvas id="guideCv"></canvas>
+        <canvas id="inkCv"></canvas>
+      </div>
+      <div class="meterTrack"><div class="meterFill" id="meter"></div></div>
+      <div class="swatches" id="swatches"></div>
+    </div>
+  </main>
+
+  <div class="overlay" id="ovWord">
+    <div class="burst" id="ovBurst">🌟</div>
+    <div class="ov-word" id="ovWordText">CAT</div>
+    <button class="ov-btn" id="ovNext">Next ▶</button>
+  </div>
+  <div class="overlay" id="ovFin">
+    <div class="burst">🏰👑✨</div>
+    <div class="ov-word">All done!</div>
+    <div class="ov-sub">You traced every word, Princess! 💖</div>
+    <button class="ov-btn" id="ovRestart">Play again 🔄</button>
+  </div>
+
+<script>
+/* ---------- 30 words, 3–5 letters (incl. her meaningful ones) ---------- */
+const WORDS = [
+  {w:"mom",pic:"👩"},{w:"dad",pic:"👨"},{w:"car",pic:"🚗"},{w:"home",pic:"🏠"},
+  {w:"cat",pic:"🐱"},{w:"dog",pic:"🐶"},{w:"sun",pic:"☀️"},{w:"cup",pic:"🥤"},
+  {w:"bus",pic:"🚌"},{w:"hat",pic:"👒"},{w:"bed",pic:"🛏️"},{w:"pig",pic:"🐷"},
+  {w:"cow",pic:"🐮"},{w:"box",pic:"📦"},{w:"key",pic:"🔑"},{w:"ball",pic:"⚽"},
+  {w:"fish",pic:"🐟"},{w:"cake",pic:"🍰"},{w:"star",pic:"⭐"},{w:"milk",pic:"🥛"},
+  {w:"book",pic:"📖"},{w:"tree",pic:"🌳"},{w:"love",pic:"❤️"},{w:"baby",pic:"👶"},
+  {w:"moon",pic:"🌙"},{w:"apple",pic:"🍎"},{w:"happy",pic:"😊"},{w:"house",pic:"🏡"},
+  {w:"water",pic:"💧"},{w:"queen",pic:"👑"}
+];
+
+const COLORS=["#e6529b","#9b59d0","#3aa0e6","#46c08a","#f0a83a","#ef6a6a"];
+
+/* ---------- state ---------- */
+let order=[], pos=0, busy=false;
+const solved=new Set();
+let guideStyle=0;          // 0 solid, 1 dashed, 2 dots
+let mode="half";           // "half" = finish at ~55% ; "full" = must trace whole word (~90%)
+const STYLE_LABEL=["✏️ Solid","✏️ Dashed","✏️ Dots"];
+let soundOn=true, paint=COLORS[0];
+let targets=[], coveredCount=0, drawing=false, lastX=0,lastY=0;
+let cssW=0,cssH=0,fontPx=0,dpr=1;
+
+const $=id=>document.getElementById(id);
+const wrap=$("wrap"), guideCv=$("guideCv"), inkCv=$("inkCv");
+const gctx=guideCv.getContext("2d");
+const ictx=inkCv.getContext("2d");
+const mask=document.createElement("canvas"), mctx=mask.getContext("2d");
+const crownsEl=$("crowns"), counterEl=$("counter"), meter=$("meter");
+
+/* ---------- audio ---------- */
+let actx=null;
+function tone(f,d,when=0,vol=.14){
+  if(!soundOn) return;
+  try{actx=actx||new(window.AudioContext||window.webkitAudioContext)();
+    const o=actx.createOscillator(),g=actx.createGain();o.type="sine";o.frequency.value=f;
+    o.connect(g);g.connect(actx.destination);const t=actx.currentTime+when;
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.02);
+    g.gain.exponentialRampToValueAtTime(.0001,t+d);o.start(t);o.stop(t+d);}catch(e){}
+}
+const fanfare=()=>[523,659,784,1047].forEach((f,i)=>tone(f,.5,i*.12,.15));
+
+/* ---------- shuffle word order once ---------- */
+function shuffleOrder(){
+  order=WORDS.map((_,i)=>i);
+  for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]];}
+}
+
+/* ---------- crowns ---------- */
+function buildCrowns(){crownsEl.innerHTML="";WORDS.forEach(()=>{const s=document.createElement("span");s.className="cr";s.textContent="👑";crownsEl.appendChild(s);});}
+const refreshCrowns=()=>[...crownsEl.children].forEach((c,i)=>c.classList.toggle("on",solved.has(i)));
+
+/* ---------- swatches ---------- */
+function buildSwatches(){
+  $("swatches").innerHTML="";
+  COLORS.forEach((c,i)=>{
+    const s=document.createElement("div");s.className="sw"+(i===0?" active":"");s.style.background=c;
+    s.onclick=()=>{paint=c;[...$("swatches").children].forEach(x=>x.classList.remove("active"));s.classList.add("active");};
+    $("swatches").appendChild(s);
+  });
+}
+
+/* ---------- layout / build the word ---------- */
+function fitSize(){
+  const r=wrap.getBoundingClientRect();
+  cssW=Math.round(r.width); cssH=Math.round(r.height);
+  dpr=Math.min(window.devicePixelRatio||1,2.5);
+  [guideCv,inkCv].forEach(cv=>{cv.width=cssW*dpr;cv.height=cssH*dpr;});
+  gctx.setTransform(dpr,0,0,dpr,0,0);
+  ictx.setTransform(dpr,0,0,dpr,0,0);
+  ictx.lineCap="round";ictx.lineJoin="round";
+  mask.width=cssW;mask.height=cssH;
+}
+function fontFor(word){
+  let size=cssH*0.62;
+  for(let k=0;k<24;k++){
+    mctx.font=`700 ${size}px Fredoka, sans-serif`;
+    const wpx=mctx.measureText(word).width;
+    if(wpx<=cssW*0.86 && size<=cssH*0.7) break;
+    size*=0.93;
+  }
+  return size;
+}
+function buildTargets(word){
+  mctx.clearRect(0,0,cssW,cssH);
+  mctx.font=`700 ${fontPx}px Fredoka, sans-serif`;
+  mctx.textAlign="center";mctx.textBaseline="middle";
+  mctx.fillStyle="#000";
+  mctx.fillText(word,cssW/2,cssH/2);
+  const img=mctx.getImageData(0,0,cssW,cssH).data;
+  targets=[];
+  const step=8;
+  for(let y=0;y<cssH;y+=step){
+    for(let x=0;x<cssW;x+=step){
+      if(img[(y*cssW+x)*4+3]>50) targets.push({x,y,c:false});
+    }
+  }
+  coveredCount=0;
+}
+function drawGuide(word){
+  gctx.clearRect(0,0,cssW,cssH);
+  gctx.textAlign="center";gctx.textBaseline="middle";
+  gctx.font=`700 ${fontPx}px Fredoka, sans-serif`;
+  if(guideStyle===0){
+    gctx.fillStyle="rgba(125,87,166,.20)";
+    gctx.fillText(word,cssW/2,cssH/2);
+  }else if(guideStyle===1){
+    gctx.lineWidth=2;gctx.setLineDash([7,7]);
+    gctx.strokeStyle="rgba(125,87,166,.5)";
+    gctx.strokeText(word,cssW/2,cssH/2);
+    gctx.setLineDash([]);
+  }else{
+    gctx.fillStyle="rgba(125,87,166,.5)";
+    for(const t of targets){ if((t.x+t.y)%24<8){ gctx.beginPath();gctx.arc(t.x,t.y,2.1,0,7);gctx.fill(); } }
+  }
+}
+function clearInk(){
+  ictx.clearRect(0,0,cssW,cssH);
+  targets.forEach(t=>t.c=false);coveredCount=0;meter.style.width="0%";
+}
+
+/* ---------- load word ---------- */
+function load(p){
+  pos=((p%order.length)+order.length)%order.length;
+  busy=false;drawing=false;
+  const idx=order[pos];const{w,pic}=WORDS[idx];
+  $("pic").textContent=pic;
+  counterEl.textContent=(pos+1)+" / "+order.length;
+  fitSize();fontPx=fontFor(w);buildTargets(w);drawGuide(w);clearInk();
+  refreshCrowns();
+}
+function currentWord(){return WORDS[order[pos]];}
+
+/* ---------- drawing / tracing ---------- */
+function pointPos(e){const r=inkCv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
+function markCovered(x,y){
+  const R=24,R2=R*R;
+  for(const t of targets){
+    if(!t.c){const dx=t.x-x,dy=t.y-y;if(dx*dx+dy*dy<=R2){t.c=true;coveredCount++;}}
+  }
+}
+function updateMeter(){
+  if(!targets.length) return;
+  const ratio=coveredCount/targets.length;
+  const thr=mode==="full"?0.90:0.55;
+  meter.style.width=Math.min(100,Math.round(ratio/thr*100))+"%";
+  if(ratio>=thr && !busy) win();
+}
+function strokeTo(x,y){
+  ictx.strokeStyle=paint;ictx.lineWidth=26;
+  ictx.beginPath();ictx.moveTo(lastX,lastY);ictx.lineTo(x,y);ictx.stroke();
+  // dab a round at the point for solid coverage
+  ictx.fillStyle=paint;ictx.beginPath();ictx.arc(x,y,13,0,7);ictx.fill();
+  markCovered(x,y);lastX=x;lastY=y;updateMeter();
+}
+inkCv.addEventListener("pointerdown",e=>{
+  if(busy)return;drawing=true;inkCv.setPointerCapture(e.pointerId);
+  const p=pointPos(e);lastX=p.x;lastY=p.y;strokeTo(p.x,p.y);
+});
+inkCv.addEventListener("pointermove",e=>{ if(!drawing||busy)return;const p=pointPos(e);strokeTo(p.x,p.y); });
+inkCv.addEventListener("pointerup",()=>drawing=false);
+inkCv.addEventListener("pointercancel",()=>drawing=false);
+inkCv.addEventListener("pointerleave",()=>drawing=false);
+
+/* ---------- win ---------- */
+function win(){
+  busy=true;
+  const idx=order[pos];solved.add(idx);refreshCrowns();fanfare();
+  meter.style.width="100%";
+  for(let k=0;k<10;k++) setTimeout(sparkleBurst,k*70);
+  setTimeout(()=>{
+    if(solved.size===WORDS.length){$("ovFin").classList.add("show");return;}
+    $("ovBurst").textContent=["🌟","🎉","✨","💖","🦄"][Math.floor(Math.random()*5)];
+    $("ovWordText").textContent=currentWord().w.toUpperCase();
+    $("ovWord").classList.add("show");
+  },650);
+}
+function spawnSpark(x,y){const s=document.createElement("div");s.className="spark";s.textContent=["✨","⭐","🌟","💖","👑"][Math.floor(Math.random()*5)];s.style.left=x+"px";s.style.top=y+"px";document.body.appendChild(s);setTimeout(()=>s.remove(),1300);}
+const sparkleBurst=()=>spawnSpark(Math.random()*innerWidth,innerHeight*.5+Math.random()*120);
+
+/* ---------- controls ---------- */
+$("prev").onclick=()=>load(pos-1);
+$("mode").onclick=()=>{
+  mode=mode==="full"?"half":"full";
+  $("mode").textContent=mode==="full"?"✓ Full":"½ Half";
+  if(targets.length){const ratio=coveredCount/targets.length;const thr=mode==="full"?0.90:0.55;meter.style.width=Math.min(100,Math.round(ratio/thr*100))+"%";}
+};
+$("next").onclick=()=>load(pos+1);
+$("clear").onclick=()=>{ if(!busy) clearInk(); };
+$("guide").onclick=()=>{ guideStyle=(guideStyle+1)%3; $("guide").firstChild.textContent=STYLE_LABEL[guideStyle].slice(2)+" "; $("guide").textContent=STYLE_LABEL[guideStyle]; drawGuide(currentWord().w); };
+$("sound").onclick=e=>{soundOn=!soundOn;e.currentTarget.classList.toggle("off",!soundOn);};
+$("ovNext").onclick=()=>{$("ovWord").classList.remove("show");let nx=pos+1;while(solved.has(order[nx%order.length])&&solved.size<WORDS.length)nx++;load(nx);};
+$("ovRestart").onclick=()=>{solved.clear();$("ovFin").classList.remove("show");shuffleOrder();load(0);};
+let rt;window.addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(()=>{ if(!busy) load(pos); },200);});
+
+/* ---------- init ---------- */
+buildCrowns();buildSwatches();shuffleOrder();
+if(document.fonts&&document.fonts.ready){ document.fonts.ready.then(()=>load(0)); } else { window.onload=()=>load(0); }
+</script>
+</body>
+</html>
